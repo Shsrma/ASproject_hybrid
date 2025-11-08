@@ -1,0 +1,79 @@
+from flask import Flask, request, render_template, send_file, jsonify, redirect, url_for
+import os
+from ipfs import IPFSClient
+from blockchain import Blockchain
+from api_bridge import verify_blockchain, get_timezone_info, translate
+
+app = Flask(__name__)
+ipfs_client = IPFSClient()
+blockchain = Blockchain()
+UPLOAD_FOLDER = 'uploads'
+DOWNLOAD_FOLDER = 'downloads'
+
+# Ensure upload and download directories exist
+os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+os.makedirs(DOWNLOAD_FOLDER, exist_ok=True)
+
+@app.route('/')
+def index():
+    # Pass default UI preferences
+    return render_template('index.html', default_lang='en', default_theme='light')
+
+@app.route('/upload', methods=['POST'])
+def upload_file():
+    file = request.files['file']
+    file_path = os.path.join(UPLOAD_FOLDER, file.filename)
+    file.save(file_path)
+
+    # Upload to IPFS
+    ipfs_hash = ipfs_client.upload_file(file_path)
+
+    # Store in blockchain
+    blockchain.create_block(len(blockchain.chain), {'file_name': file.filename, 'ipfs_hash': ipfs_hash})
+
+    # Optionally verify via Java service
+    verify_result = verify_blockchain({'file_name': file.filename, 'ipfs_hash': ipfs_hash})
+
+    return jsonify({'message': 'File uploaded and stored in IPFS!', 'ipfs_hash': ipfs_hash, 'verify': verify_result})
+
+@app.route('/download', methods=['POST'])
+def download_file():
+    ipfs_hash = request.form['ipfs_hash']
+
+    # Search for the block with the given IPFS hash to retrieve the original filename
+    original_filename = None
+    for block in blockchain.chain:
+        if block.data.get('ipfs_hash') == ipfs_hash:
+            original_filename = block.data.get('file_name')
+            break
+
+    if original_filename is None:
+        return 'Error: IPFS hash not found in the blockchain.'
+
+    # Download the file from IPFS and save it locally in the 'downloads' folder
+    file_obj = ipfs_client.download_file(ipfs_hash, DOWNLOAD_FOLDER)
+    file_path = os.path.join(DOWNLOAD_FOLDER, ipfs_hash)  # Path where the file was saved
+
+    if not os.path.exists(file_path):
+        return f'Error: File {ipfs_hash} not found in local storage!'
+
+    # Rename the downloaded file to its original filename with extension
+    final_file_path = os.path.join(DOWNLOAD_FOLDER, original_filename)
+    os.rename(file_path, final_file_path)
+
+    # Serve the file for download with the original filename and extension
+    return send_file(final_file_path, as_attachment=True, download_name=original_filename)
+
+@app.route('/timezone-info')
+def timezone_info():
+    region = request.args.get('region')
+    return jsonify(get_timezone_info(region))
+
+@app.route('/translate-ui')
+def translate_ui():
+    text = request.args.get('text', 'Hello')
+    lang = request.args.get('lang', 'en')
+    return jsonify(translate(text, lang))
+
+if __name__ == '__main__':
+    app.run(debug=True)

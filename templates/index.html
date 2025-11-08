@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BlockShareCloud - Hybrid</title>
+  <link rel="stylesheet" href="/static/styles.css">
+</head>
+<body>
+  <div class="topbar">
+    <div class="left">
+      <button id="themeToggle">Toggle Dark</button>
+      <select id="langSelect">
+        <option value="en">English</option>
+        <option value="hi">Hindi</option>
+        <option value="es">Spanish</option>
+      </select>
+    </div>
+    <div class="right">
+      <select id="tzSelect">
+        <option value="">Auto Timezone</option>
+        <option value="Asia/Kolkata">Asia/Kolkata</option>
+        <option value="UTC">UTC</option>
+        <option value="America/New_York">America/New_York</option>
+      </select>
+      <span id="tzDisplay"></span>
+    </div>
+  </div>
+
+  <div class="container">
+    <h1 id="title">BlockShareCloud</h1>
+    <div class="upload-section">
+      <h2 id="uploadTitle">Upload a File</h2>
+      <form id="uploadForm" action="/upload" method="post" enctype="multipart/form-data">
+        <input type="file" name="file" class="file-input" required>
+        <input type="submit" value="Upload" class="btn" id="uploadBtn">
+      </form>
+      <div id="uploadResult"></div>
+    </div>
+
+    <div class="download-section">
+      <h2 id="downloadTitle">Download a File</h2>
+      <form id="downloadForm" action="/download" method="post">
+        <input type="text" name="ipfs_hash" placeholder="Enter IPFS Hash" class="input-text" required>
+        <input type="submit" value="Download" class="btn" id="downloadBtn">
+      </form>
+    </div>
+  </div>
+
+  <script src="/static/script.js"></script>
+</body>
+</html>
