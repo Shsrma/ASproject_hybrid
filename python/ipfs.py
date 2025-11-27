@@ -1,5 +1,6 @@
 import os
-import ipfshttpclient2 as ipfshttpclient
+import ipfshttpclient
+
 import shutil
 
 

@@ -3,7 +3,8 @@ requests==2.31.0
 gunicorn==21.2.0
 
 # Replaces ipfshttpclient (incompatible with Python 3.12)
-ipfshttpclient2==0.8.0.2
+ipfshttpclient==0.8.0a2
+
 
 # Flask dependencies with correct versions
 Werkzeug==3.0.1
