@@ -4,49 +4,72 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>BlockShareCloud - Hybrid</title>
-  <link rel="stylesheet" href="/static/styles.css">
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+  <script defer src="{{ url_for('static', filename='script.js') }}"></script>
 </head>
+
 <body>
-  <div class="topbar">
+  <header class="topbar">
     <div class="left">
-      <button id="themeToggle">Toggle Dark</button>
-      <select id="langSelect">
+      <button id="themeToggle" type="button">Toggle Dark</button>
+
+      <label class="visually-hidden" for="langSelect">Language</label>
+      <select id="langSelect" aria-label="Select Language">
         <option value="en">English</option>
         <option value="hi">Hindi</option>
         <option value="es">Spanish</option>
       </select>
     </div>
+
     <div class="right">
-      <select id="tzSelect">
+      <label class="visually-hidden" for="tzSelect">Timezone</label>
+      <select id="tzSelect" aria-label="Select Timezone">
         <option value="">Auto Timezone</option>
         <option value="Asia/Kolkata">Asia/Kolkata</option>
         <option value="UTC">UTC</option>
         <option value="America/New_York">America/New_York</option>
       </select>
-      <span id="tzDisplay"></span>
-    </div>
-  </div>
 
-  <div class="container">
+      <span id="tzDisplay" class="timezone-display"></span>
+    </div>
+  </header>
+
+  <main class="container">
     <h1 id="title">BlockShareCloud</h1>
-    <div class="upload-section">
+
+    <!-- Upload Section -->
+    <section class="upload-section">
       <h2 id="uploadTitle">Upload a File</h2>
-      <form id="uploadForm" action="/upload" method="post" enctype="multipart/form-data">
-        <input type="file" name="file" class="file-input" required>
-        <input type="submit" value="Upload" class="btn" id="uploadBtn">
-      </form>
-      <div id="uploadResult"></div>
-    </div>
 
-    <div class="download-section">
+      <form id="uploadForm" method="POST" enctype="multipart/form-data">
+        <label class="visually-hidden" for="fileInput">Choose File</label>
+        <input id="fileInput" type="file" name="file" class="file-input" required>
+
+        <button id="uploadBtn" type="submit" class="btn">Upload</button>
+      </form>
+
+      <pre id="uploadResult"></pre>
+    </section>
+
+    <!-- Download Section -->
+    <section class="download-section">
       <h2 id="downloadTitle">Download a File</h2>
-      <form id="downloadForm" action="/download" method="post">
-        <input type="text" name="ipfs_hash" placeholder="Enter IPFS Hash" class="input-text" required>
-        <input type="submit" value="Download" class="btn" id="downloadBtn">
-      </form>
-    </div>
-  </div>
 
-  <script src="/static/script.js"></script>
+      <form id="downloadForm" action="/download" method="POST">
+        <input
+          id="hashInput"
+          type="text"
+          name="ipfs_hash"
+          placeholder="Enter IPFS Hash"
+          class="input-text"
+          required
+        >
+
+        <button id="downloadBtn" type="submit" class="btn">Download</button>
+      </form>
+    </section>
+
+  </main>
+
 </body>
 </html>
