@@ -1,20 +1,22 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>BlockShareCloud - Hybrid</title>
-  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+
+  <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}" />
   <script defer src="{{ url_for('static', filename='script.js') }}"></script>
 </head>
 
 <body>
-  <header class="topbar">
-    <div class="left">
-      <button id="themeToggle" type="button">Toggle Dark</button>
 
-      <label class="visually-hidden" for="langSelect">Language</label>
-      <select id="langSelect" aria-label="Select Language">
+  <!-- Top Navigation Bar -->
+  <header class="topbar glass">
+    <div class="left">
+      <button id="themeToggle" type="button" class="btn small">Toggle Dark</button>
+
+      <select id="langSelect" aria-label="Select Language" class="select small">
         <option value="en">English</option>
         <option value="hi">Hindi</option>
         <option value="es">Spanish</option>
@@ -22,38 +24,35 @@
     </div>
 
     <div class="right">
-      <label class="visually-hidden" for="tzSelect">Timezone</label>
-      <select id="tzSelect" aria-label="Select Timezone">
+      <select id="tzSelect" aria-label="Select Timezone" class="select small">
         <option value="">Auto Timezone</option>
         <option value="Asia/Kolkata">Asia/Kolkata</option>
         <option value="UTC">UTC</option>
         <option value="America/New_York">America/New_York</option>
       </select>
-
       <span id="tzDisplay" class="timezone-display"></span>
     </div>
   </header>
 
   <main class="container">
-    <h1 id="title">BlockShareCloud</h1>
 
-    <!-- Upload Section -->
-    <section class="upload-section">
-      <h2 id="uploadTitle">Upload a File</h2>
+    <h1 id="title" class="main-title">BlockShareCloud</h1>
+
+    <!-- Upload Card -->
+    <section class="card glass upload-section">
+      <h2 id="uploadTitle" class="card-title">Upload a File</h2>
 
       <form id="uploadForm" method="POST" enctype="multipart/form-data">
-        <label class="visually-hidden" for="fileInput">Choose File</label>
-        <input id="fileInput" type="file" name="file" class="file-input" required>
-
-        <button id="uploadBtn" type="submit" class="btn">Upload</button>
+        <input id="fileInput" type="file" name="file" class="input-file" required>
+        <button id="uploadBtn" type="submit" class="btn primary">Upload</button>
       </form>
 
-      <pre id="uploadResult"></pre>
+      <pre id="uploadResult" class="result-box"></pre>
     </section>
 
-    <!-- Download Section -->
-    <section class="download-section">
-      <h2 id="downloadTitle">Download a File</h2>
+    <!-- Download Card -->
+    <section class="card glass download-section">
+      <h2 id="downloadTitle" class="card-title">Download a File</h2>
 
       <form id="downloadForm" action="/download" method="POST">
         <input
@@ -64,8 +63,7 @@
           class="input-text"
           required
         >
-
-        <button id="downloadBtn" type="submit" class="btn">Download</button>
+        <button id="downloadBtn" type="submit" class="btn primary">Download</button>
       </form>
     </section>
 

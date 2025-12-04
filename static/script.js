@@ -1,5 +1,5 @@
 // =============================
-// ELEMENT REFERENCES
+// ELEMENTS
 // =============================
 const themeToggle = document.getElementById("themeToggle");
 const langSelect = document.getElementById("langSelect");
@@ -9,16 +9,16 @@ const tzDisplay = document.getElementById("tzDisplay");
 const uploadForm = document.getElementById("uploadForm");
 const uploadResult = document.getElementById("uploadResult");
 
-const downloadBtn = document.getElementById("downloadBtn"); // NEW
-const hashInput = document.getElementById("hashInput");     // NEW
+const downloadBtn = document.getElementById("downloadBtn");
+const hashInput = document.getElementById("hashInput");
 
 // =============================
-// THEME TOGGLE
+// THEME SYSTEM
 // =============================
 const savedTheme = localStorage.getItem("theme") || "light";
 document.documentElement.setAttribute("data-theme", savedTheme);
 themeToggle.textContent =
-  savedTheme === "dark" ? "Toggle Light" : "Toggle Dark";
+  savedTheme === "dark" ? "Light Mode" : "Dark Mode";
 
 themeToggle.addEventListener("click", () => {
   const newTheme =
@@ -28,12 +28,13 @@ themeToggle.addEventListener("click", () => {
 
   document.documentElement.setAttribute("data-theme", newTheme);
   localStorage.setItem("theme", newTheme);
+
   themeToggle.textContent =
-    newTheme === "dark" ? "Toggle Light" : "Toggle Dark";
+    newTheme === "dark" ? "Light Mode" : "Dark Mode";
 });
 
 // =============================
-// LANGUAGE TRANSLATION SYSTEM
+// LANGUAGE SYSTEM
 // =============================
 const translations = {
   en: {
@@ -72,16 +73,13 @@ function applyLang(lang) {
   localStorage.setItem("lang", lang);
 }
 
-const savedLang = localStorage.getItem("lang") || "en";
-langSelect.value = savedLang;
-applyLang(savedLang);
+langSelect.value = localStorage.getItem("lang") || "en";
+applyLang(langSelect.value);
 
-langSelect.addEventListener("change", (e) =>
-  applyLang(e.target.value)
-);
+langSelect.addEventListener("change", (e) => applyLang(e.target.value));
 
 // =============================
-// TIMEZONE SYSTEM
+// TIMEZONE
 // =============================
 function updateTimezoneDisplay(region = "") {
   const url = region
@@ -91,11 +89,9 @@ function updateTimezoneDisplay(region = "") {
   fetch(url)
     .then((r) => r.json())
     .then((data) => {
-      if (data.error) {
-        tzDisplay.textContent = "Timezone Error";
-      } else {
-        tzDisplay.textContent = `${data.timezone} — ${data.datetime}`;
-      }
+      tzDisplay.textContent = data.timezone
+        ? `${data.timezone} — ${data.datetime}`
+        : "Timezone Error";
     })
     .catch(() => {
       tzDisplay.textContent = "TZ Error";
@@ -103,14 +99,13 @@ function updateTimezoneDisplay(region = "") {
 }
 
 tzSelect.addEventListener("change", () => {
-  const region = tzSelect.value;
-  updateTimezoneDisplay(region || "");
+  updateTimezoneDisplay(tzSelect.value || "");
 });
 
 updateTimezoneDisplay();
 
 // =============================
-// FILE UPLOAD SYSTEM (AJAX)
+// FILE UPLOAD
 // =============================
 uploadForm.addEventListener("submit", async (event) => {
   event.preventDefault();
@@ -127,26 +122,25 @@ uploadForm.addEventListener("submit", async (event) => {
     const json = await resp.json();
 
     if (json.error) {
-      uploadResult.textContent = "Upload error: " + json.error;
+      uploadResult.textContent = "Upload Error: " + json.error;
       return;
     }
 
     uploadResult.innerHTML =
-      `✅ <b>Uploaded!</b><br>IPFS Hash:<br><code>${json.ipfs_hash}</code><br><br>` +
-      `Blockchain Verify:<br><code>${JSON.stringify(json.verify)}</code>`;
+      `✔ Uploaded!\nIPFS Hash:\n${json.ipfs_hash}\n\n` +
+      `Blockchain Verify:\n${JSON.stringify(json.verify)}`;
   } catch (err) {
     uploadResult.textContent = "Upload failed: " + err.message;
   }
 });
 
 // =============================
-// DOWNLOAD BUTTON HANDLER
+// DOWNLOAD
 // =============================
 downloadBtn.addEventListener("click", () => {
   if (!hashInput.value.trim()) {
     alert("Please enter an IPFS hash.");
     return;
   }
-
   document.getElementById("downloadForm").submit();
 });
