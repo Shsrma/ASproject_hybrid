@@ -79,9 +79,11 @@ class Blockchain:
 
     def is_chain_valid(self):
         for i in range(1, len(self.chain)):
-    block = self.chain[i]
-    previous_block = self.chain[i - 1]
+            block = self.chain[i]
+            previous_block = self.chain[i - 1]
 
-    if block.previous_hash != previous_block.hash:
-        return False
-
+            if block.previous_hash != previous_block.hash:
+                return False
+                
+        # Return True if the entire chain is valid
+        return True
