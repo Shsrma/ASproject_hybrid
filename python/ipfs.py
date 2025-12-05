@@ -1,70 +1,59 @@
 import os
-import ipfshttpclient
-
+import requests
 import shutil
 
 
 class IPFSClient:
     def __init__(self):
         """
-        Use environment variable IPFS_HOST for cloud compatibility.
-        Defaults to local IPFS daemon: 127.0.0.1:5001
+        Uses IPFS_HOST environment variable when deployed.
+        Default: local IPFS daemon (http://127.0.0.1:5001)
         """
-        ipfs_host = os.environ.get("IPFS_HOST", "/ip4/127.0.0.1/tcp/5001")
-
-        try:
-            self.client = ipfshttpclient.connect(ipfs_host)
-        except Exception as e:
-            raise RuntimeError(f"Unable to connect to IPFS at {ipfs_host}: {e}")
+        self.host = os.environ.get("IPFS_HOST", "http://127.0.0.1:5001")
 
     def upload_file(self, file_path):
         """
-        Upload a file to IPFS.
-        Handles both old-style and list-style responses.
+        Upload a file to IPFS using the HTTP API.
+        Returns the CID (hash).
         """
-        res = self.client.add(file_path)
-
-        # Handle response types
-        if isinstance(res, list):  # newer versions return list of dicts
-            res = res[-1]
-
-        return res.get("Hash")
+        url = f"{self.host}/api/v0/add"
+        with open(file_path, "rb") as f:
+            response = requests.post(url, files={"file": f})
+        response.raise_for_status()
+        return response.json()["Hash"]
 
     def download_file(self, ipfs_hash, download_folder):
         """
-        Download a file/folder from IPFS.
-        Ensures clean folder, handles different IPFS output formats.
+        Download a file from IPFS and save it to a folder.
+        Returns the final downloaded file path.
         """
-        target_path = os.path.join(download_folder, ipfs_hash)
+        url = f"{self.host}/api/v0/get?arg={ipfs_hash}"
 
-        # Ensure base folder exists
         if not os.path.exists(download_folder):
             os.makedirs(download_folder)
 
-        # Clean previous download for same hash
-        if os.path.exists(target_path):
-            shutil.rmtree(target_path)
+        temp_path = os.path.join(download_folder, ipfs_hash + ".tar")
 
-        # Fetch from IPFS
-        self.client.get(ipfs_hash, target=download_folder)
+        # Download content
+        response = requests.post(url, stream=True)
+        response.raise_for_status()
 
-        # Check if IPFS created a folder named after the hash
-        if os.path.isdir(target_path):
-            # Return the first file inside the hash folder
-            for root, _, files in os.walk(target_path):
-                if files:
-                    return os.path.join(root, files[0])
+        with open(temp_path, "wb") as f:
+            for chunk in response.iter_content(chunk_size=8192):
+                if chunk:
+                    f.write(chunk)
 
-        # If a single file was downloaded directly
-        direct_file = os.path.join(download_folder, ipfs_hash)
-        if os.path.isfile(direct_file):
-            return direct_file
+        # Extract content
+        extract_dir = os.path.join(download_folder, ipfs_hash)
+        if os.path.exists(extract_dir):
+            shutil.rmtree(extract_dir)
 
-        # If get created multiple items, return first file found
-        for item in os.listdir(download_folder):
-            item_path = os.path.join(download_folder, item)
-            if os.path.isfile(item_path):
-                return item_path
+        shutil.unpack_archive(temp_path, extract_dir, format="tar")
+        os.remove(temp_path)
 
-        raise FileNotFoundError("Downloaded IPFS content contains no files.")
+        # Return first file in the extracted folder
+        for root, _, files in os.walk(extract_dir):
+            if files:
+                return os.path.join(root, files[0])
 
+        raise FileNotFoundError("No files found in IPFS download.")
