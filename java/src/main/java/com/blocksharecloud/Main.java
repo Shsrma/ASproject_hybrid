@@ -16,6 +16,9 @@ public class Main {
 
     public static void main(String[] args) throws Exception {
 
+        // REQUIRED FIX (Java 25+ CORS & header protection)
+        System.setProperty("sun.net.http.allowRestrictedHeaders", "true");
+
         int port = 9000;
 
         HttpServer server = HttpServer.create(new InetSocketAddress(port), 0);
@@ -74,7 +77,14 @@ class TimezoneHandler implements HttpHandler {
 
         String region = queryParams.getOrDefault("region", "UTC");
 
-        ZoneId zone = ZoneId.of(region);
+        // FIX: Prevent crash if timezone invalid
+        ZoneId zone;
+        try {
+            zone = ZoneId.of(region);
+        } catch (Exception e) {
+            zone = ZoneId.of("UTC");
+        }
+
         ZonedDateTime now = ZonedDateTime.now(zone);
 
         String json =

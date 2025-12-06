@@ -1,3 +1,4 @@
+# blockchain.py
 import hashlib
 import time
 import json
@@ -35,16 +36,19 @@ class Block:
 class Blockchain:
     def __init__(self, save_path=None):
         """
-        If save_path is None → no file saving (cloud compatible)
-        If save_path is provided → local file saving enabled
+        save_path=None → memory-only blockchain (good for cloud)
+        save_path="chain.json" → persistent mode
         """
         self.save_path = save_path
         self.chain = []
 
         if self.save_path and os.path.exists(self.save_path):
-            self.load()
+            try:
+                self.load()
+            except Exception:
+                self.chain = []
+                self.create_block({"message": "Genesis Block"})
         else:
-            # Create Genesis Block
             self.create_block({"message": "Genesis Block"})
 
     def create_block(self, data):
@@ -80,10 +84,9 @@ class Blockchain:
     def is_chain_valid(self):
         for i in range(1, len(self.chain)):
             block = self.chain[i]
-            previous_block = self.chain[i - 1]
+            prev = self.chain[i - 1]
 
-            if block.previous_hash != previous_block.hash:
+            if block.previous_hash != prev.hash:
                 return False
-                
-        # Return True if the entire chain is valid
+
         return True
